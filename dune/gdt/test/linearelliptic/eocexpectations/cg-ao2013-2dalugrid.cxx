@@ -1,6 +1,6 @@
 #include <config.h>
 
-#if HAVE_ALUGRID
+#if HAVE_DUNE_ALUGRID
 
 #include "cg-ao2013-2dalugrid.hh"
 
@@ -74,4 +74,4 @@ LinearEllipticEocExpectations<LinearElliptic::AO2013TestCase<AluSimplex2dGridTyp
 } // namespace GDT
 } // namespace Dune
 
-#endif // HAVE_ALUGRID
+#endif // HAVE_DUNE_ALUGRID

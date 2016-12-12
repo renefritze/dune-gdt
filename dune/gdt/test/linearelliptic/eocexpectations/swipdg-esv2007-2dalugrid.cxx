@@ -1,6 +1,6 @@
 #include <config.h>
 
-#if HAVE_ALUGRID
+#if HAVE_DUNE_ALUGRID
 
 #include "swipdg-esv2007-2dalugrid.hh"
 
@@ -118,4 +118,4 @@ LinearEllipticEocExpectations<LinearElliptic::ESV2007TestCase<AluSimplex2dGridTy
 } // namespace Test
 } // namespace GDT
 } // namespace Dune
-#endif // HAVE_ALUGRID
+#endif // HAVE_DUNE_ALUGRID

@@ -1,6 +1,6 @@
 #include <config.h>
 
-#if HAVE_ALUGRID
+#if HAVE_DUNE_ALUGRID
 
 #include "swipdg-mixedboundary-2dalugrid.hh"
 
@@ -118,4 +118,4 @@ LinearEllipticEocExpectations<LinearElliptic::MixedBoundaryTestCase<AluSimplex2d
 } // namespace GDT
 } // namespace Dune
 
-#endif // HAVE_ALUGRID
+#endif // HAVE_DUNE_ALUGRID

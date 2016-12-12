@@ -7,9 +7,9 @@
 
 #include "config.h"
 
-#if HAVE_ALUGRID
+#if HAVE_DUNE_ALUGRID
 
-#include <dune/grid/alugrid.hh>
+#include <dune/alugrid/grid.hh>
 
 #include "../problems/spe10.hh"
 #include "../swipdg-estimator-expectations.hh"
@@ -94,4 +94,4 @@ template class LinearEllipticSwipdgEstimatorExpectations<LinearElliptic::Spe10Mo
 } // namespace GDT
 } // namespace Dune
 
-#endif // HAVE_ALUGRID
+#endif // HAVE_DUNE_ALUGRID
