@@ -231,7 +231,8 @@ struct EigenvectorInitializer<1, rangeDim, MatrixType, EigenMatrixType, Analytic
       // = 0. As the analytical flux is linear, the jacobian A is constant, so it is enough to evaluate at 0.
       ::Eigen::EigenSolver<typename EigenMatrixType::BackendType> eigen_solver(
           Dune::XT::Common::from_string<EigenMatrixType>(
-              Dune::XT::Common::to_string(analytical_flux.jacobian(typename AnalyticalFluxType::RangeType(0))))
+              Dune::XT::Common::to_string(analytical_flux.jacobian(typename AnalyticalFluxType::RangeType(0), typename AnalyticalFluxType::EntityType{},
+                                                                   typename AnalyticalFluxType::EntityType::Geometry::LocalCoordinate(0))))
               .backend());
       assert(eigen_solver.info() == ::Eigen::Success);
       const auto eigen_eigenvectors = eigen_solver.eigenvectors();
@@ -346,7 +347,8 @@ public:
           NumericalBoundaryFluxType;
 
   AdvectionLaxFriedrichsOperator(const AnalyticalFluxType& analytical_flux,
-                                 const BoundaryValueFunctionType& boundary_values, const LocalizableFunctionType& dx,
+                                 const BoundaryValueFunctionType& boundary_values,
+                                 const LocalizableFunctionType& dx,
                                  const double dt, const bool is_linear = false,
                                  const bool use_linear_reconstruction    = false,
                                  const bool use_local_laxfriedrichs_flux = false,
