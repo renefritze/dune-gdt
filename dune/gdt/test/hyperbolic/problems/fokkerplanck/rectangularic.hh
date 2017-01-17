@@ -55,17 +55,99 @@ public:
     return BaseType::type() + ".rectangularic";
   }
 
-protected:
-  class GetData : BaseType::GetData
+  static ConfigType default_grid_config()
   {
-    typedef typename BaseType::GetData GetDataBaseType;
+    ConfigType grid_config;
+    grid_config["type"]         = "provider.cube";
+    grid_config["lower_left"]   = "[0.0]";
+    grid_config["upper_right"]  = "[7.0]";
+    grid_config["num_elements"] = "[500]";
+    return grid_config;
+  }
 
-  public:
-    using GetDataBaseType::exact_legendre;
-    using GetDataBaseType::S;
-    using GetDataBaseType::M_inverse;
-    using GetDataBaseType::base_integrated;
+  static ConfigType default_boundary_info_config()
+  {
+    ConfigType boundary_config;
+    boundary_config["type"] = "dirichlet";
+    return boundary_config;
+  }
 
+  static std::unique_ptr<ThisType> create(const ConfigType cfg       = default_config(),
+                                          const std::string sub_name = static_id())
+  {
+    const ConfigType config = cfg.has_sub(sub_name) ? cfg.sub(sub_name) : cfg;
+    const std::shared_ptr<const DefaultFluxType> flux(DefaultFluxType::create(config.sub("flux")));
+    const std::shared_ptr<const DefaultRHSType> rhs(DefaultRHSType::create(config.sub("rhs")));
+    const std::shared_ptr<const DefaultInitialValueType> initial_values(
+        DefaultInitialValueType::create(config.sub("initial_values")));
+    const ConfigType grid_config   = config.sub("grid");
+    const ConfigType boundary_info = config.sub("boundary_info");
+    const std::shared_ptr<const DefaultBoundaryValueType> boundary_values(
+        DefaultBoundaryValueType::create(config.sub("boundary_values")));
+    return XT::Common::make_unique<ThisType>(flux, rhs, initial_values, grid_config, boundary_info, boundary_values);
+  } // ... create(...)
+
+  static std::unique_ptr<ThisType> create(const std::string basefunctions_file)
+  {
+    return create(default_config(basefunctions_file), static_id());
+  } // ... create(...)
+
+  static ConfigType default_config()
+  {
+    ConfigType config = BaseType::default_config();
+    config.add(default_grid_config(), "grid", true);
+    config.add(default_boundary_info_config(), "boundary_info", true);
+    ConfigType rhs_config;
+    rhs_config["lower_left"]   = "[0.0]";
+    rhs_config["upper_right"]  = "[7.0]";
+    rhs_config["num_elements"] = "[1]";
+    GetData::create_rhs_values(rhs_config);
+    rhs_config["name"] = static_id();
+    config.add(rhs_config, "rhs", true);
+    ConfigType initial_value_config;
+    initial_value_config["lower_left"]   = "[0.0]";
+    initial_value_config["upper_right"]  = "[7.0]";
+    initial_value_config["num_elements"] = "[7]";
+    GetData::create_initial_values(initial_value_config);
+    config.add(initial_value_config, "initial_values", true);
+    ConfigType boundary_value_config;
+    boundary_value_config["type"]       = DefaultBoundaryValueType::static_id();
+    boundary_value_config["variable"]   = "x";
+    boundary_value_config["expression"] = GetData::create_boundary_values();
+    boundary_value_config["order"]      = "10";
+    config.add(boundary_value_config, "boundary_values", true);
+    if (sub_name.empty())
+      return config;
+    else {
+      ConfigType tmp;
+      tmp.add(config, sub_name);
+      return tmp;
+    }
+  } // ... default_config(...)
+
+  RectangularIC(const std::shared_ptr<const FluxType> flux_in, const std::shared_ptr<const RHSType> rhs_in,
+                const std::shared_ptr<const InitialValueType> initial_values_in, const ConfigType& grid_config_in,
+                const ConfigType& boundary_info_in, const std::shared_ptr<const BoundaryValueType> boundary_values_in)
+    : BaseType(flux_in, rhs_in, initial_values_in, grid_config_in, boundary_info_in, boundary_values_in)
+  {
+  }
+
+  virtual double CFL() const override
+  {
+    return 0.4;
+  }
+
+  virtual double t_end() const override
+  {
+    return 1.0;
+  }
+
+  virtual bool has_non_zero_rhs() const override
+  {
+    return true;
+  }
+
+protected:
     // initial value of kinetic equation is 10 if 3 <= x <= 4 and 10^(-4) else, thus initial value of the
     // k-th component of the moment vector is 10*base_integrated_k or 10^(-4)*base_integrated_k.
     // For Legendre polynomials, this is 20 or 0.0002 if k == 0 and 0 else
@@ -171,100 +253,8 @@ protected:
         return str;
       }
     } // ... create_boundary_values()
-  }; // class GetData
 
-public:
-  static ConfigType default_grid_config()
-  {
-    ConfigType grid_config;
-    grid_config["type"]         = "provider.cube";
-    grid_config["lower_left"]   = "[0.0]";
-    grid_config["upper_right"]  = "[7.0]";
-    grid_config["num_elements"] = "[500]";
-    return grid_config;
-  }
 
-  static ConfigType default_boundary_info_config()
-  {
-    ConfigType boundary_config;
-    boundary_config["type"] = "dirichlet";
-    return boundary_config;
-  }
-
-  static std::unique_ptr<ThisType> create(const ConfigType cfg       = default_config(),
-                                          const std::string sub_name = static_id())
-  {
-    const ConfigType config = cfg.has_sub(sub_name) ? cfg.sub(sub_name) : cfg;
-    const std::shared_ptr<const DefaultFluxType> flux(DefaultFluxType::create(config.sub("flux")));
-    const std::shared_ptr<const DefaultRHSType> rhs(DefaultRHSType::create(config.sub("rhs")));
-    const std::shared_ptr<const DefaultInitialValueType> initial_values(
-        DefaultInitialValueType::create(config.sub("initial_values")));
-    const ConfigType grid_config   = config.sub("grid");
-    const ConfigType boundary_info = config.sub("boundary_info");
-    const std::shared_ptr<const DefaultBoundaryValueType> boundary_values(
-        DefaultBoundaryValueType::create(config.sub("boundary_values")));
-    return XT::Common::make_unique<ThisType>(flux, rhs, initial_values, grid_config, boundary_info, boundary_values);
-  } // ... create(...)
-
-  static std::unique_ptr<ThisType> create(const std::string basefunctions_file)
-  {
-    return create(default_config(basefunctions_file), static_id());
-  } // ... create(...)
-
-  static ConfigType default_config(const std::string basefunctions_file = "", const std::string sub_name = "")
-  {
-    ConfigType config = BaseType::default_config(basefunctions_file, sub_name);
-    config.add(default_grid_config(), "grid", true);
-    config.add(default_boundary_info_config(), "boundary_info", true);
-    ConfigType rhs_config;
-    rhs_config["lower_left"]   = "[0.0]";
-    rhs_config["upper_right"]  = "[7.0]";
-    rhs_config["num_elements"] = "[1]";
-    GetData::create_rhs_values(rhs_config);
-    rhs_config["name"] = static_id();
-    config.add(rhs_config, "rhs", true);
-    ConfigType initial_value_config;
-    initial_value_config["lower_left"]   = "[0.0]";
-    initial_value_config["upper_right"]  = "[7.0]";
-    initial_value_config["num_elements"] = "[7]";
-    GetData::create_initial_values(initial_value_config);
-    config.add(initial_value_config, "initial_values", true);
-    ConfigType boundary_value_config;
-    boundary_value_config["type"]       = DefaultBoundaryValueType::static_id();
-    boundary_value_config["variable"]   = "x";
-    boundary_value_config["expression"] = GetData::create_boundary_values();
-    boundary_value_config["order"]      = "10";
-    config.add(boundary_value_config, "boundary_values", true);
-    if (sub_name.empty())
-      return config;
-    else {
-      ConfigType tmp;
-      tmp.add(config, sub_name);
-      return tmp;
-    }
-  } // ... default_config(...)
-
-  RectangularIC(const std::shared_ptr<const FluxType> flux_in, const std::shared_ptr<const RHSType> rhs_in,
-                const std::shared_ptr<const InitialValueType> initial_values_in, const ConfigType& grid_config_in,
-                const ConfigType& boundary_info_in, const std::shared_ptr<const BoundaryValueType> boundary_values_in)
-    : BaseType(flux_in, rhs_in, initial_values_in, grid_config_in, boundary_info_in, boundary_values_in)
-  {
-  }
-
-  virtual double CFL() const override
-  {
-    return 0.4;
-  }
-
-  virtual double t_end() const override
-  {
-    return 1.0;
-  }
-
-  virtual bool has_non_zero_rhs() const override
-  {
-    return true;
-  }
 };
 
 } // namespace Problems
