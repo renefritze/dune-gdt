@@ -12,6 +12,7 @@
 #include <dune/gdt/timestepper/interface.hh>
 #include <dune/gdt/timestepper/adaptive-rungekutta.hh>
 #include <dune/gdt/timestepper/explicit-rungekutta.hh>
+#include <dune/gdt/timestepper/implicit-rungekutta.hh>
 
 
 namespace Dune {
@@ -26,8 +27,16 @@ struct TimeStepperFactory
                       || method == TimeStepperMethods::adaptive_rungekutta_other,
                   typename Dune::GDT::
                       AdaptiveRungeKuttaTimeStepper<OperatorImp, DiscreteFunctionImp, TimeFieldImp, method>,
-                  typename Dune::GDT::
-                      ExplicitRungeKuttaTimeStepper<OperatorImp, DiscreteFunctionImp, TimeFieldImp, method>>::type
+                  typename std::
+                      conditional<method == TimeStepperMethods::implicit_euler,
+                                  typename Dune::GDT::DiagonallyImplicitRungeKuttaTimeStepper<OperatorImp,
+                                                                                              DiscreteFunctionImp,
+                                                                                              TimeFieldImp,
+                                                                                              method>,
+                                  typename Dune::GDT::ExplicitRungeKuttaTimeStepper<OperatorImp,
+                                                                                    DiscreteFunctionImp,
+                                                                                    TimeFieldImp,
+                                                                                    method>>::type>::type
           TimeStepperType;
 
   static TimeStepperType create(const OperatorImp& op,
