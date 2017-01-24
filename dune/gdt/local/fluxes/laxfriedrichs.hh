@@ -37,13 +37,13 @@ namespace GDT {
 
 // forwards
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsNumericalCouplingFlux;
+class LaxFriedrichsLocalNumericalCouplingFlux;
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsDirichletNumericalBoundaryFlux;
+class LaxFriedrichsLocalDirichletNumericalBoundaryFlux;
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux;
+class LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux;
 
 #if HAVE_EIGEN
 
@@ -51,8 +51,8 @@ namespace internal {
 
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsNumericalCouplingFluxTraits
-    : public LocalGodunovNumericalCouplingFluxTraits<AnalyticalFluxImp, domainDim>
+class LaxFriedrichsLocalNumericalCouplingFluxTraits
+    : public GodunovLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, domainDim>
 {
   static_assert(Dune::XT::Functions::is_localizable_function<LocalizableFunctionImp>::value,
                 "LocalizableFunctionImp has to be derived from XT::Functions::is_localizable_function.");
@@ -64,37 +64,37 @@ public:
   static_assert(LocalizableFunctionType::dimRangeCols == 1, "Not implemented for dimRangeCols > 1!");
 
   typedef typename LocalizableFunctionType::DomainType DomainType;
-  typedef LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionType, domainDim> derived_type;
-}; // class LocalLaxFriedrichsNumericalCouplingFluxTraits
+  typedef LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionType, domainDim> derived_type;
+}; // class LaxFriedrichsLocalNumericalCouplingFluxTraits
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits
-    : public LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
+class LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits
+    : public LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
 {
-  typedef LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim> BaseType;
+  typedef LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim> BaseType;
 
 public:
   using BaseType::dimDomain;
   using typename BaseType::LocalfunctionType;
   typedef BoundaryValueFunctionImp BoundaryValueFunctionType;
   typedef typename BoundaryValueFunctionType::LocalfunctionType BoundaryValueLocalfunctionType;
-  typedef LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+  typedef LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                            BoundaryValueFunctionImp,
                                                            LocalizableFunctionImp,
                                                            domainDim>
       derived_type;
   typedef std::tuple<std::shared_ptr<LocalfunctionType>, std::shared_ptr<BoundaryValueLocalfunctionType>>
       LocalfunctionTupleType;
-}; // class LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits
+}; // class LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsAbsorbingNumericalBoundaryFluxTraits
-    : public LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
+class LaxFriedrichsLocalAbsorbingNumericalBoundaryFluxTraits
+    : public LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
 {
 public:
-  typedef LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
+  typedef LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
       derived_type;
-}; // class LocalLaxFriedrichsAbsorbingNumericalBoundaryFluxTraits
+}; // class LaxFriedrichsLocalAbsorbingNumericalBoundaryFluxTraits
 
 
 } // namespace internal
@@ -104,14 +104,14 @@ public:
  *  \brief  Lax-Friedrichs flux evaluation for inner intersections and periodic boundary intersections.
  */
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim = LocalizableFunctionImp::dimDomain>
-class LocalLaxFriedrichsNumericalCouplingFlux
+class LaxFriedrichsLocalNumericalCouplingFlux
     : public LocalNumericalCouplingFluxInterface<internal::
-                                                     LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp,
+                                                     LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp,
                                                                                                    LocalizableFunctionImp,
                                                                                                    domainDim>>
 {
 public:
-  typedef internal::LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
+  typedef internal::LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>
       Traits;
   typedef typename Traits::LocalizableFunctionType LocalizableFunctionType;
   typedef typename Traits::LocalfunctionTupleType LocalfunctionTupleType;
@@ -127,7 +127,7 @@ public:
   static const size_t dimDomain = Traits::dimDomain;
   static const size_t dimRange = Traits::dimRange;
 
-  explicit LocalLaxFriedrichsNumericalCouplingFlux(const AnalyticalFluxType& analytical_flux,
+  explicit LaxFriedrichsLocalNumericalCouplingFlux(const AnalyticalFluxType& analytical_flux,
                                                    const LocalizableFunctionType& dx,
                                                    const double dt,
                                                    const bool is_linear = false,
@@ -270,36 +270,36 @@ private:
   static typename Dune::XT::Common::PerThreadValue<bool> geometry_evaluated_;
   mutable typename Dune::XT::Common::PerThreadValue<RangeFieldType> vol_intersection_;
   mutable typename Dune::XT::Common::PerThreadValue<int> num_neighbors_;
-}; // class LocalLaxFriedrichsNumericalCouplingFlux
+}; // class LaxFriedrichsLocalNumericalCouplingFlux
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<
-    typename LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::DomainType>
-    LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::max_derivative_;
+    typename LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::DomainType>
+    LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::max_derivative_;
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp,
                                             LocalizableFunctionImp,
                                             domainDim>::max_derivative_calculated_(false);
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::geometry_evaluated_(
+    LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, domainDim>::geometry_evaluated_(
         false);
 
 /**
  *  \brief  Lax-Friedrichs flux evaluation for inner intersections and periodic boundary intersections.
  */
 template <class AnalyticalFluxImp, class LocalizableFunctionImp>
-class LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>
+class LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>
     : public LocalNumericalCouplingFluxInterface<internal::
-                                                     LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp,
+                                                     LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp,
                                                                                                    LocalizableFunctionImp,
                                                                                                    1>>
 {
 public:
-  typedef internal::LocalLaxFriedrichsNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, 1> Traits;
+  typedef internal::LaxFriedrichsLocalNumericalCouplingFluxTraits<AnalyticalFluxImp, LocalizableFunctionImp, 1> Traits;
   typedef typename Traits::LocalizableFunctionType LocalizableFunctionType;
   typedef typename Traits::LocalfunctionTupleType LocalfunctionTupleType;
   typedef typename Traits::EntityType EntityType;
@@ -313,7 +313,7 @@ public:
   static const size_t dimDomain = Traits::dimDomain;
   static const size_t dimRange = Traits::dimRange;
 
-  explicit LocalLaxFriedrichsNumericalCouplingFlux(const AnalyticalFluxType& analytical_flux,
+  explicit LaxFriedrichsLocalNumericalCouplingFlux(const AnalyticalFluxType& analytical_flux,
                                                    const LocalizableFunctionType& dx,
                                                    const double dt,
                                                    const bool is_linear,
@@ -424,16 +424,16 @@ private:
   const bool use_local_;
   static typename Dune::XT::Common::PerThreadValue<RangeFieldType> max_derivative_;
   static typename Dune::XT::Common::PerThreadValue<bool> max_derivative_calculated_;
-}; // class LocalLaxFriedrichsNumericalCouplingFlux< ... , 1 >
+}; // class LaxFriedrichsLocalNumericalCouplingFlux< ... , 1 >
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp>
 typename Dune::XT::Common::PerThreadValue<
-    typename LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::RangeFieldType>
-    LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::max_derivative_(0);
+    typename LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::RangeFieldType>
+    LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::max_derivative_(0);
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::max_derivative_calculated_(
+    LaxFriedrichsLocalNumericalCouplingFlux<AnalyticalFluxImp, LocalizableFunctionImp, 1>::max_derivative_calculated_(
         false);
 
 
@@ -444,15 +444,15 @@ template <class AnalyticalFluxImp,
           class BoundaryValueFunctionImp,
           class LocalizableFunctionImp,
           size_t domainDim = LocalizableFunctionImp::dimDomain>
-class LocalLaxFriedrichsDirichletNumericalBoundaryFlux
+class LaxFriedrichsLocalDirichletNumericalBoundaryFlux
     : public LocalNumericalBoundaryFluxInterface<internal::
-                                                     LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+                                                     LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                                                             BoundaryValueFunctionImp,
                                                                                                             LocalizableFunctionImp,
                                                                                                             domainDim>>
 {
 public:
-  typedef internal::LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+  typedef internal::LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                            BoundaryValueFunctionImp,
                                                                            LocalizableFunctionImp,
                                                                            domainDim>
@@ -472,7 +472,7 @@ public:
   static const size_t dimDomain = Traits::dimDomain;
   static const size_t dimRange = Traits::dimRange;
 
-  explicit LocalLaxFriedrichsDirichletNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
+  explicit LaxFriedrichsLocalDirichletNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
                                                             const BoundaryValueFunctionType& boundary_values,
                                                             const LocalizableFunctionType& dx,
                                                             const double dt,
@@ -615,50 +615,50 @@ private:
   static typename Dune::XT::Common::PerThreadValue<bool> geometry_evaluated_;
   mutable typename Dune::XT::Common::PerThreadValue<RangeFieldType> vol_intersection_;
   mutable typename Dune::XT::Common::PerThreadValue<int> num_neighbors_;
-}; // class LocalLaxFriedrichsDirichletNumericalBoundaryFlux
+}; // class LaxFriedrichsLocalDirichletNumericalBoundaryFlux
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<
-    typename LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    typename LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                               BoundaryValueFunctionImp,
                                                               LocalizableFunctionImp,
                                                               domainDim>::DomainType>
-    LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                      BoundaryValueFunctionImp,
                                                      LocalizableFunctionImp,
                                                      domainDim>::max_derivative_;
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                      BoundaryValueFunctionImp,
                                                      LocalizableFunctionImp,
                                                      domainDim>::max_derivative_calculated_(false);
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp, size_t domainDim>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                      BoundaryValueFunctionImp,
                                                      LocalizableFunctionImp,
                                                      domainDim>::geometry_evaluated_(false);
 
 
 /**
-*  \brief  Lax-Friedrichs flux evaluation for LocalLaxFriedrichsDirichletNumericalBoundaryFlux boundary intersections.
+*  \brief  Lax-Friedrichs flux evaluation for LaxFriedrichsLocalDirichletNumericalBoundaryFlux boundary intersections.
 */
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp>
-class LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+class LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                        BoundaryValueFunctionImp,
                                                        LocalizableFunctionImp,
                                                        1>
     : public LocalNumericalBoundaryFluxInterface<internal::
-                                                     LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+                                                     LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                                                             BoundaryValueFunctionImp,
                                                                                                             LocalizableFunctionImp,
                                                                                                             1>>
 {
 public:
-  typedef internal::LocalLaxFriedrichsDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+  typedef internal::LaxFriedrichsLocalDirichletNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                            BoundaryValueFunctionImp,
                                                                            LocalizableFunctionImp,
                                                                            1>
@@ -678,7 +678,7 @@ public:
   static const size_t dimDomain = Traits::dimDomain;
   static const size_t dimRange = Traits::dimRange;
 
-  explicit LocalLaxFriedrichsDirichletNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
+  explicit LaxFriedrichsLocalDirichletNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
                                                             const BoundaryValueFunctionType& boundary_values,
                                                             const LocalizableFunctionType& dx,
                                                             const double dt,
@@ -788,22 +788,22 @@ private:
   const bool use_local_;
   static typename Dune::XT::Common::PerThreadValue<RangeFieldType> max_derivative_;
   static typename Dune::XT::Common::PerThreadValue<bool> max_derivative_calculated_;
-}; // class LocalLaxFriedrichsDirichletNumericalBoundaryFlux< ... , 1 >
+}; // class LaxFriedrichsLocalDirichletNumericalBoundaryFlux< ... , 1 >
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp>
 typename Dune::XT::Common::PerThreadValue<
-    typename LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    typename LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                               BoundaryValueFunctionImp,
                                                               LocalizableFunctionImp,
                                                               1>::RangeFieldType>
-    LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                      BoundaryValueFunctionImp,
                                                      LocalizableFunctionImp,
                                                      1>::max_derivative_(0);
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionImp, class LocalizableFunctionImp>
 typename Dune::XT::Common::PerThreadValue<bool>
-    LocalLaxFriedrichsDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
+    LaxFriedrichsLocalDirichletNumericalBoundaryFlux<AnalyticalFluxImp,
                                                      BoundaryValueFunctionImp,
                                                      LocalizableFunctionImp,
                                                      1>::max_derivative_calculated_(false);
@@ -813,14 +813,14 @@ typename Dune::XT::Common::PerThreadValue<bool>
  *  \brief  Lax-Friedrichs flux evaluation for absorbing boundary conditions on boundary intersections.
  */
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux
+class LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux
     : public LocalNumericalBoundaryFluxInterface<internal::
-                                                     LocalLaxFriedrichsAbsorbingNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+                                                     LaxFriedrichsLocalAbsorbingNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                                                             LocalizableFunctionImp,
                                                                                                             domainDim>>
 {
 public:
-  typedef internal::LocalLaxFriedrichsAbsorbingNumericalBoundaryFluxTraits<AnalyticalFluxImp,
+  typedef internal::LaxFriedrichsLocalAbsorbingNumericalBoundaryFluxTraits<AnalyticalFluxImp,
                                                                            LocalizableFunctionImp,
                                                                            domainDim>
       Traits;
@@ -835,7 +835,7 @@ public:
   static const size_t dimDomain = Traits::dimDomain;
   static const size_t dimRange = Traits::dimRange;
 
-  explicit LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
+  explicit LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux(const AnalyticalFluxType& analytical_flux,
                                                             const LocalizableFunctionType& /*dx*/,
                                                             const double /*dt*/,
                                                             const bool /*use_local*/)
@@ -876,25 +876,25 @@ public:
 
 private:
   const AnalyticalFluxType& analytical_flux_;
-}; // class LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux
+}; // class LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux
 
 
 #else // HAVE_EIGEN
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsNumericalCouplingFlux
+class LaxFriedrichsLocalNumericalCouplingFlux
 {
   static_assert(AlwaysFalse<AnalyticalFluxImp>::value, "You are missing eigen!");
 };
 
 template <class AnalyticalFluxImp, class BoundaryValueFunctionType, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsDirichletNumericalBoundaryFlux
+class LaxFriedrichsLocalDirichletNumericalBoundaryFlux
 {
   static_assert(AlwaysFalse<AnalyticalFluxImp>::value, "You are missing eigen!");
 };
 
 template <class AnalyticalFluxImp, class LocalizableFunctionImp, size_t domainDim>
-class LocalLaxFriedrichsAbsorbingNumericalBoundaryFlux
+class LaxFriedrichsLocalAbsorbingNumericalBoundaryFlux
 {
   static_assert(AlwaysFalse<AnalyticalFluxImp>::value, "You are missing eigen!");
 };
