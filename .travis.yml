@@ -22,7 +22,7 @@ before_script:
     - printenv | \grep encrypt >> ${ENV_FILE}
     - printenv | \grep TEST >> ${ENV_FILE}
     - printenv | \grep TOKEN >> ${ENV_FILE}
-    - pushd ${TRAVIS_BUILD_DIR} && git status ; popd
+    - pushd ${TRAVIS_BUILD_DIR} && git status ; git log | head ; popd
     - export DOCKER_RUN="docker run --env-file ${ENV_FILE} -v ${TRAVIS_BUILD_DIR}:/root/src/${MY_MODULE} ${IMAGE}"
 
 script:
