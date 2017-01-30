@@ -497,8 +497,8 @@ public:
   typedef typename Traits::LocalizableFunctionType LocalizableFunctionType;
   using BaseType::dimDomain;
   using BaseType::dimRange;
-  using BaseType::MatrixType;
-  using BaseType::EigenMatrixType;
+  using typename BaseType::MatrixType;
+  using typename BaseType::EigenMatrixType;
 
 public:
   AdvectionLaxFriedrichsOperator(const AnalyticalFluxType& analytical_flux,
