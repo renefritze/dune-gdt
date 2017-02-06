@@ -27,6 +27,15 @@
 
 namespace Dune {
 namespace GDT {
+namespace internal {
+
+
+class NoJacobian
+{
+};
+
+
+} // namespace internal
 
 
 /**
@@ -39,7 +48,7 @@ class OperatorInterface : public XT::CRTPInterface<OperatorInterface<Traits>, Tr
 public:
   typedef typename Traits::derived_type derived_type;
   typedef typename Traits::FieldType FieldType;
-  //  typedef typename Traits::JacobianType JacobianType;
+  typedef typename Traits::JacobianType JacobianType;
 
   /// \name Methods that have to be implemented by any derived class
   /// \{
@@ -57,12 +66,19 @@ public:
     return this->as_imp().apply2(range, source);
   }
 
-  //  template< class SourceType >
-  //  JacobianType jacobian(const SourceType& source) const
-  //  {
-  //    CHECK_CRTP(this->as_imp().jacobian(source));
-  //    return this->as_imp().jacobian(source);
-  //  }
+  template <class SourceType>
+  JacobianType jacobian(const SourceType& source) const
+  {
+    CHECK_CRTP(this->as_imp().jacobian(source));
+    return this->as_imp().jacobian(source);
+  }
+
+  template <class SourceType>
+  void jacobian(const SourceType& source, JacobianType& jac) const
+  {
+    CHECK_CRTP(this->as_imp().jacobian(source));
+    return this->as_imp().jacobian(source);
+  }
 
   template <class RangeType, class SourceType>
   void apply_inverse(const RangeType& range, SourceType& source, const XT::Common::Configuration& opts) const
