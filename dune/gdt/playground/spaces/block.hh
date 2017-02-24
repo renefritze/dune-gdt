@@ -14,6 +14,7 @@
 #endif
 
 #include <dune/gdt/playground/mapper/block.hh>
+#include <dune/gdt/playground/spaces/dg/fem.hh>
 
 #include "../../spaces/interface.hh"
 
@@ -86,9 +87,12 @@ public:
   typedef typename BaseType::PatternType  PatternType;
   typedef typename BaseType::GridViewType GridViewType;
   typedef typename BaseType::EntityType   EntityType;
-  typedef typename BaseType::CommunicatorType CommunicatorType;
 
   typedef grid::Multiscale::Default< typename GridViewType::Grid > MsGridType;
+  typedef Spaces::DG::FemBased<typename MsGridType::GlobalGridPartType, Traits::polOrder,  double,
+      LocalSpaceType::dimRange,
+      LocalSpaceType::dimRangeCols  > GlobalFakeSpaceType;
+  typedef typename GlobalFakeSpaceType::CommunicatorType CommunicatorType;
 
   Block(const std::shared_ptr< const MsGridType >& ms_grid,
         const std::vector< std::shared_ptr< const LocalSpaceType > >& local_spaces)
@@ -96,6 +100,7 @@ public:
     , grid_view_(ms_grid_->globalGridView())
     , local_spaces_(local_spaces)
     , mapper_(std::make_shared< MapperType >(ms_grid_, local_spaces_))
+    , fake_global_space_(ms_grid_->globalGridPart())
   {
     if (local_spaces_.size() != ms_grid_->size())
       DUNE_THROW(Stuff::Exceptions::shapes_do_not_match,
@@ -159,8 +164,8 @@ public:
 
   CommunicatorType& communicator() const
   {
-    DUNE_THROW(NotImplemented, "I am not sure yet how to implement this!");
-    return local_spaces_[0]->communicator();
+    fake_global_space_.communicator().remoteIndices().template rebuild<true>();
+    return fake_global_space_.communicator();
   }
 
 private:
@@ -191,6 +196,7 @@ private:
   const GridViewType grid_view_;
   const std::vector< std::shared_ptr< const LocalSpaceType > > local_spaces_;
   const std::shared_ptr< const MapperType > mapper_;
+  GlobalFakeSpaceType fake_global_space_;
 }; // class Block
 
 

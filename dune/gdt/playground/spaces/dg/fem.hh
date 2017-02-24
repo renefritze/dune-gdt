@@ -69,7 +69,7 @@ public:
         RangeFieldType, rangeDim, rangeDimCols > BaseFunctionSetType;
   static const Stuff::Grid::ChoosePartView part_view_type = Stuff::Grid::ChoosePartView::part;
   static const bool needs_grid_view = false;
-  typedef CommunicationChooser< GridViewType, false > CommunicationChooserType;
+  typedef CommunicationChooser< GridViewType, true > CommunicationChooserType;
   typedef typename CommunicationChooserType::Type     CommunicatorType;
 }; // class FemBasedTraits
 
