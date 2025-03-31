@@ -46,7 +46,7 @@ jobs:
       run: echo "See the preflight job for details on how to resolve this!"
     - name: Configure
       run: |
-        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} configure'
+        OPTS=${OPTS} ./docker/run_ci.sh 'git config --global --add safe.directory /source && ${DUNECONTROL} configure'
     - name: Upload error logs (on failure)
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
