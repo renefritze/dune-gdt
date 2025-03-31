@@ -11,7 +11,11 @@
 
 # cmake-lint: disable=C0103,W0106
 macro(DUNE_XT_MODULE_VERSION_FROM_GIT)
-  # Note that it is not possible to encode the information about a dirty working directory in the version.
+  # We use git to determine our version. To be usable in
+  # https://cmake.org/cmake/help/latest/command/project.html#options the version needs to be of the form
+  # <major>[.<minor>[.<patch>[.<tweak>]]], where major.minor.patch are determined from the closest previous git tag, and
+  # tweak the number of commits since then. Note that it is not possible to encode the information about a dirty working
+  # directory in the version.
   find_program(GIT_EXECUTABLE git REQUIRED)
 
   # first determine the version from the closest previous tag
@@ -48,18 +52,20 @@ macro(DUNE_XT_MODULE_VERSION_FROM_GIT)
       set(GIT_DESCRIBE_VERSION "${GIT_DESCRIBE_VERSION}.${GIT_COUNT_SINCE_TAG}")
     endif()
 
+    set(PROJECT_VERSION "${GIT_DESCRIBE_VERSION}")
+
   endif()
   message(STATUS "Setting project version as determined from git history: ${PROJECT_VERSION}")
 
-  # The `DUNE_GDT_VERSION*` variables constantly regenerate from a cmake target. Instead of trying  to overwrite them,
+  # We will use DUNE_GDT_GIT_VERSION in other scripts further below
+  set(DUNE_GDT_GIT_VERSION ${GIT_DESCRIBE_VERSION})
+
+  # The `DUNE_GDT_VERSION*` variables constantly regenerate from a cmake target. Instead of trying to overwrite them,
   # create our own set `DUNE_GDT_GIT_VERSION*`
   extract_major_minor_version("${GIT_DESCRIBE_VERSION}" DUNE_VERSION)
-  foreach(mod_var ${target_module} ${TARGET_MODULE_UPPER})
-    set(${mod_var}_GIT_VERSION ${GIT_DESCRIBE_VERSION})
-    set(${mod_var}_GIT_VERSION_MAJOR "${DUNE_VERSION_MAJOR}")
-    set(${mod_var}_GIT_VERSION_MINOR "${DUNE_VERSION_MINOR}")
-    set(${mod_var}_GIT_VERSION_REVISION "${DUNE_VERSION_REVISION}")
-  endforeach(mod_var)
+  set(DUNE_GDT_GIT_VERSION_MAJOR "${DUNE_VERSION_MAJOR}")
+  set(DUNE_GDT_GIT_VERSION_MINOR "${DUNE_VERSION_MINOR}")
+  set(DUNE_GDT_GIT_VERSION_REVISION "${DUNE_VERSION_REVISION}")
   set(CPACK_PACKAGE_NAME "${DUNE_MOD_NAME}")
   set(CPACK_PACKAGE_VERSION "${DUNE_VERSION_MAJOR}.${DUNE_VERSION_MINOR}.${DUNE_VERSION_REVISION}")
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")

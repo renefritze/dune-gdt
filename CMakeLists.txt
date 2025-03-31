@@ -13,8 +13,19 @@
 # Tobias Leibner  (2016, 2018 - 2021)
 # ~~~
 
-# set up project
-project("dune-gdt" CXX)
+cmake_minimum_required(VERSION 3.13)
+# To allow VERSION
+cmake_policy(SET CMP0048 NEW)
+
+# We automatically determine our PROJECT_VERSION from git, which needs to happen before the project() call.
+include(cmake/DuneGdtVersioneer.cmake)
+
+project(
+  dune-gdt
+  VERSION ${PROJECT_VERSION}
+  DESCRIPTION "Generic discretization toolbox for grid-based numerical methods."
+  HOMEPAGE_URL "https://github.com/dune-gdt/dune-gdt/"
+  LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.13)
 
