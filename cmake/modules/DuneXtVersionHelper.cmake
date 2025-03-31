@@ -11,20 +11,45 @@
 
 # cmake-lint: disable=C0103,W0106
 macro(DUNE_XT_MODULE_VERSION_FROM_GIT)
-  set(target_module dune-gdt)
-  set(TARGET_MODULE_UPPER DUNE_GDT)
-  set(VERSIONEER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+  # Note that it is not possible to encode the information about a dirty working directory in the version.
+  find_program(GIT_EXECUTABLE git REQUIRED)
 
+  # first determine the version from the closest previous tag
   execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${VERSIONEER_DIR}/versioneer.py ${PROJECT_SOURCE_DIR}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    # only match tags that start with "20" followed by a digit
+    COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "20[0-9]*"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_DESCRIBE_VERSION
     ERROR_VARIABLE GIT_DESCRIBE_ERROR
     RESULT_VARIABLE GIT_DESCRIBE_ERROR_CODE
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(GIT_DESCRIBE_ERROR_CODE)
-    message(FATAL_ERROR "Extracting version information failed: ${GIT_DESCRIBE_ERROR}")
+    message(WARNING "Could not determine the closest previous version as git tag, falling back to 0.0.0! "
+                    "Ensure that there exists a git tag of the form:\n    vMAJOR.MINOR.PATCH\n"
+                    "The original error was: ${GIT_DESCRIBE_ERROR}")
+    set(PROJECT_VERSION "0.0.0")
+  else()
+    # second, determine the number of commits since that tag
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD ^${GIT_DESCRIBE_VERSION}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_COUNT_SINCE_TAG
+      ERROR_VARIABLE GIT_COUNT_SINCE_TAG_ERROR
+      RESULT_VARIABLE GIT_COUNT_SINCE_TAG_ERROR_CODE
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(GIT_COUNT_SINCE_TAG_ERROR_CODE)
+      message(WARNING "Could not determine the number of commits since ${GIT_DESCRIBE_VERSION}, " "falling back to 0! "
+                      "The original error was: ${GIT_COUNT_SINCE_TAG_ERROR}")
+      set(GIT_COUNT_SINCE_TAG "0")
+    endif()
+
+    # append the number of commits since the tag in case they are not zero
+    if(NOT ${GIT_COUNT_SINCE_TAG} STREQUAL "0")
+      set(GIT_DESCRIBE_VERSION "${GIT_DESCRIBE_VERSION}.${GIT_COUNT_SINCE_TAG}")
+    endif()
+
   endif()
+  message(STATUS "Setting project version as determined from git history: ${PROJECT_VERSION}")
 
   # The `DUNE_GDT_VERSION*` variables constantly regenerate from a cmake target. Instead of trying  to overwrite them,
   # create our own set `DUNE_GDT_GIT_VERSION*`
