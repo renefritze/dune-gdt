@@ -7,6 +7,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
+
   preflight:
     name: Preflight
     runs-on: ubuntu-22.04
@@ -26,6 +27,7 @@ jobs:
         echo "    https://github.com/dune-gdt/dune-gdt/actions/workflows/docker_build_images.yml"
         echo "and running the workflow (butten in the upper right) for the current branch!"
         exit 1
+
   headerchecks:
     name: Check headers
     needs: preflight
@@ -74,10 +76,12 @@ jobs:
     - name: Check headers
       run: |
         OPTS=${OPTS} ./docker/run_ci.sh 'git config --global --add safe.directory /source && ${DUNECONTROL} bexec "ninja dxt_headercheck"'
+
   cpp_tests:
     name: Build and run C++ tests
     needs: preflight
     runs-on: ubuntu-22.04
+    timeout-minutes: 180
     env:
       OPTS: gcc-debug.ninja
       DXT_TEST_TIMEOUT: 1200
@@ -109,6 +113,7 @@ jobs:
     - name: Run tests
       run: |
         OPTS=${OPTS} ./docker/run_ci.sh 'git config --global --add safe.directory /source && ${DUNECONTROL} bexec ctest "-V --timeout ${DXT_TEST_TIMEOUT} -j ${DXT_TEST_PROCS}"'
+
   python_bindings_and_tests:
     name: Build Python bindings and run Python tests
     needs: preflight
