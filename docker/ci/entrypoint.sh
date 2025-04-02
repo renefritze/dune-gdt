@@ -11,6 +11,8 @@ echo "127.0.0.1 ${HOSTNAME}" >> /etc/hosts
 echo '[entrypoint] use ${DUNECONTROL} to configure and build dune-gdt'
 echo
 
+git config --global --add safe.directory /source
+
 if [ "X$@" == "X" ]; then
     exec /bin/bash --rcfile <(cat /root/.bashrc; cat /venvs/${OPTS}.sh)
 else
