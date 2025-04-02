@@ -9,8 +9,12 @@ RUN apt-get update -qq 1> /dev/null && \
     apt-get install -q=100 -y --no-install-recommends locales 1> /dev/null && \
     dpkg-reconfigure locales
 
+# OMPI_ALLOW_RUN_AS_ROOT* is required for root in rootless docker
+
 # then do the rest
 ENV DXT_ENVIRONMENT=debian-full \
+    OMPI_ALLOW_RUN_AS_ROOT=1 \
+    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
     CLANG_VERSION=15 \
     GCC_VERSION=10 \
     CLANG_PYTHON_PACKAGE=python3-clang \
