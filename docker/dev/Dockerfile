@@ -27,13 +27,46 @@ ENV DXT_ENVIRONMENT=debian-full \
 
 RUN echo "deb http://deb.debian.org/debian stable contrib non-free" > /etc/apt/sources.list.d/stable-nonfree.list && \
     apt-get update -qq 1> /dev/null && \
-    apt-get install -q=100 -y --no-install-recommends automake ninja-build bison build-essential cmake flex gfortran git libboost-system-dev \
-                libboost-thread-dev libboost-filesystem-dev libboost-date-time-dev \
-                libboost-timer-dev libboost-chrono-dev libsuperlu-dev libtool \
-                pkg-config python3 python3-dbg python3-dev libgraphviz-dev python3-tk \
-                python3-pip python3-virtualenv unzip virtualenv wget libopenblas-dev \
-                g++-${GCC_VERSION} gcc-${GCC_VERSION} gfortran-${GCC_VERSION} \
-                ca-certificates wget sudo cmake cmake-curses-gui gosu 1> /dev/null && \
+    apt-get install -q=100 -y --no-install-recommends \
+        automake \
+        bison \
+        build-essential \
+        ca-certificates \
+        cmake \
+        cmake \
+        cmake-curses-gui \
+        flex \
+        g++-${GCC_VERSION} \
+        gcc-${GCC_VERSION} \
+        gfortran \
+        gfortran-${GCC_VERSION} \
+        git \
+        gosu \
+        libboost-chrono-dev \
+        libboost-date-time-dev \
+        libboost-filesystem-dev \
+        libboost-system-dev \
+        libboost-thread-dev \
+        libboost-timer-dev \
+        libglu1-mesa\
+        libgraphviz-dev \
+        libopenblas-dev \
+        libopengl-dev \
+        libsuperlu-dev \
+        libtool \
+        ninja-build \
+        pkg-config \
+        python3 \
+        python3-dbg \
+        python3-dev \
+        python3-pip \
+        python3-tk \
+        python3-virtualenv \
+        sudo \
+        unzip \
+        virtualenv \
+        wget \
+        1> /dev/null && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 100
 RUN cd /tmp && git clone https://github.com/dune-community/cli-setup && \
     cd cli-setup && \
