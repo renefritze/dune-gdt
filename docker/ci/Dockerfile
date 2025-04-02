@@ -9,6 +9,15 @@ SHELL ["/bin/bash", "-ec"]
 USER root
 
 RUN \
+    apt-get update -qq 1> /dev/null && \
+    apt-get install -q=100 -y --no-install-recommends \
+        xvfb \
+        && \
+    apt-get autoremove -y 1> /dev/null && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN \
     git clone https://github.com/dune-gdt/dune-merged.git /source && \
     cd /source && git checkout ${DUNE_GDT_REF} && \
     git submodule update --init --recursive && \
