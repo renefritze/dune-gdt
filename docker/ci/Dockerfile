@@ -11,6 +11,7 @@ USER root
 RUN \
     apt-get update -qq 1> /dev/null && \
     apt-get install -q=100 -y --no-install-recommends \
+        xauth \
         xvfb \
         && \
     apt-get autoremove -y 1> /dev/null && \
