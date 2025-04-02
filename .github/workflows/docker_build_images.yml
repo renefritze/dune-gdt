@@ -10,6 +10,7 @@ on:
         default: "main"
 jobs:
   docker_build_images:
+    name: Build and publish docker images
     runs-on: ubuntu-22.04
     permissions: write-all
     steps:
