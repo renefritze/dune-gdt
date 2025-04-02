@@ -61,6 +61,7 @@ RUN echo "deb http://deb.debian.org/debian stable contrib non-free" > /etc/apt/s
         python3-dev \
         python3-pip \
         python3-tk \
+        python3-venv \
         python3-virtualenv \
         sudo \
         unzip \
