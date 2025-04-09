@@ -19,7 +19,7 @@ RUN \
     rm -rf /var/lib/apt/lists/*
 
 RUN \
-    git clone https://github.com/dune-gdt/dune-merged.git /source && \
+    git clone https://github.com/dune-gdt/dune-gdt.git /source && \
     cd /source && git checkout ${DUNE_GDT_REF} && \
     git submodule update --init --recursive && \
     for OPTS in gcc-debug.ninja; do \
