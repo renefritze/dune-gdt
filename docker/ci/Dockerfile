@@ -22,6 +22,7 @@ RUN \
     git clone https://github.com/dune-gdt/dune-gdt.git /source && \
     cd /source && git checkout ${DUNE_GDT_REF} && \
     git submodule update --init --recursive && \
+    rm -rf $(ls | grep -v deps | grep -v deps) && \
     for OPTS in gcc-debug.ninja; do \
         virtualenv -p python3.9 /venvs/venv-${OPTS} && \
         echo "export DUNECONTROL=\"/source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} --only=dune-gdt \"" > /venvs/${OPTS}.sh && \
@@ -29,11 +30,11 @@ RUN \
         echo "cd /source" >> /venvs/${OPTS}.sh && \
         . /venvs/${OPTS}.sh && \
         WERROR=0 /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} configure && \
-        /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all && \
-        sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.xt-nspkg.pth && \
-        sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth \
-    ; done && \
-    rm -rf /build/${OPTS}/dune-gdt
+        /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all \
+    ; done
+    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.xt-nspkg.pth && \
+    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth \
+    # rm -rf /build/${OPTS}/dune-gdt
 
 RUN \
     mv /data/bashrc /root/.bashrc && \
