@@ -38,9 +38,6 @@ jobs:
   build:
     name: Build
     needs: preflight
-    # headerchecks:
-    #   name: Check headers
-    #   needs: preflight
     runs-on: ubuntu-22.04
     env:
       OPTS: gcc-debug.ninja
@@ -71,11 +68,6 @@ jobs:
           build-dune-gdt-ci/*/CMakeFiles/CMakeError.log
           build-dune-gdt-ci/*/CMakeFiles/CMakeOutput.log
 
-    - name: Fix virtualenv
-      run: |
-        sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.xt-nspkg.pth
-        sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth
-
     - name: Build all
       run: |
         OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} all'
@@ -83,8 +75,7 @@ jobs:
     - name: Abort with meaningful error message (on failure)
       if: ${{ failure() }}
       run: |
-        echo "::error::There was an error configuring or building (see above)!"
-        echo "::error::To reproduce the failure locally, execute"
+        echo "::error::There was an error configuring or building (see above)! To reproduce the failure locally, execute"
         echo "::error::    git clone https://github.com/dune-gdt/dune-gdt.git"
         echo "::error::    cd dune-gdt"
         echo "::error::    git checkout -b ${{ github.ref }} ${{ github.event.pull_request.base.sha }}"
@@ -95,6 +86,52 @@ jobs:
         echo "::error::An interactive shell can afterwards be obtained by"
         echo "::error::    DOCKER_RUN_CI_ARGS=-i OPTS=${OPTS} ./docker/run_ci.sh /bin/bash"
         exit 1
+
+    - uses: actions/cache/save@v4
+      name: Store build dir
+      with:
+        path: build
+        key: build
+        enableCrossOsArchive: true
+
+  cpp_test:
+    name: C++ Tests
+    needs: build
+    runs-on: ubuntu-22.04
+    env:
+      OPTS: gcc-debug.ninja
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        submodules: recursive
+
+    # This step should not fail, as we checked this in prefligh
+    - name: Pull docker/ci image
+      run: docker pull ghcr.io/${{ github.repository }}/ci:$(./docker/compute_ci_hash.sh)
+
+    - uses: actions/cache/restore@v4
+      id: restore
+      name: Restore build dir
+      with:
+        path: build
+        key: build
+
+    - name: Report on cache hit
+      run: |
+        if [ "${{ steps.restore.outputs.cache-hit }}" == "true" ]; then
+          echo "Cache hit"
+        else
+          echo "Cache miss"
+        fi
+
+    - name: Build all
+      run: |
+        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} all'
+
   #   - name: Check headers
   #     run: |
   #       OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} bexec "ninja dxt_headercheck"'
