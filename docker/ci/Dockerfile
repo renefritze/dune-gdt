@@ -1,6 +1,6 @@
 FROM ghcr.io/dune-gdt/dune-gdt/dev:FROM_DEV_HASH
 
-# only update the DUNE_GDT_REF if any of hashes in docker/compute_ci_hash.sh apart from CI_HASH change!
+# only update the DUNE_GDT_REF if any of the hashes in docker/compute_ci_hash.sh apart from CI_HASH change!
 ENV \
     DEBIAN_FRONTEND=noninteractive \
     DUNE_GDT_REF=0ca387e690d46fa7fc46a4ec364363726cb30134
@@ -22,13 +22,32 @@ RUN \
     git clone https://github.com/dune-gdt/dune-gdt.git /source && \
     cd /source && git checkout ${DUNE_GDT_REF} && \
     git submodule update --init --recursive && \
-    rm -rf $(ls | grep -v deps | grep -v deps) && \
+    rm -rf cmake \
+        CMakeLists.txt \
+        config.h.cmake \
+        CONTRIBUTING.md \
+        doc \
+        docker \
+        docker-compose.yml \
+        dune \
+        dune-gdt.pc.in \
+        dune.module \
+        examples \
+        LICENSE \
+        make_docker_wheels.bash \
+        merge.bash \
+        python \
+        README.md \
+        stamp-vc \
+        tutorials \
+        && \
     for OPTS in gcc-debug.ninja; do \
         virtualenv -p python3.9 /venvs/venv-${OPTS} && \
         echo "export DUNECONTROL=\"/source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} --only=dune-gdt \"" > /venvs/${OPTS}.sh && \
         echo ". /venvs/venv-${OPTS}/bin/activate" >> /venvs/${OPTS}.sh && \
         echo "cd /source" >> /venvs/${OPTS}.sh && \
         . /venvs/${OPTS}.sh && \
+        python -m pip install mpi4py==4.0.3 -i https://pypi.anaconda.org/mpi4py/simple && \
         WERROR=0 /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} configure && \
         /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all \
     ; done
