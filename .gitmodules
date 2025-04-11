@@ -25,7 +25,7 @@
 	url = https://github.com/dune-gdt/scripts.git
 [submodule "dune-testtools"]
 	path = deps/dune-testtools
-	url = https://gitlab.dune-project.org/quality/dune-testtools
+	url = https://github.com/dune-community/dune-testtools.git
 [submodule "dune-alugrid"]
 	path = deps/dune-alugrid
 	url = https://gitlab.dune-project.org/extensions/dune-alugrid.git
@@ -39,3 +39,8 @@
 	path = deps/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = v2.10
+
+[submodule "deps/dune-uggrid"]
+	path = deps/dune-uggrid
+	url = https://gitlab.dune-project.org/staging/dune-uggrid
+	branch = releases/2.10
