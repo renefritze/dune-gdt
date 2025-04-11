@@ -90,7 +90,7 @@ jobs:
     - uses: actions/cache/save@v4
       name: Store build dir
       with:
-        path: build
+        path: build-dune-gdt-ci/gcc-debug.ninja
         key: build
         enableCrossOsArchive: true
 
@@ -117,7 +117,8 @@ jobs:
       id: restore
       name: Restore build dir
       with:
-        path: build
+        path: build-dune-gdt-ci/gcc-debug.ninja
+        fail-on-cache-miss: true
         key: build
 
     - name: Report on cache hit
