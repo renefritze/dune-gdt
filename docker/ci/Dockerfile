@@ -18,6 +18,7 @@ RUN \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# We prepare re-usable venvs that can be moved into the build directory and adapted
 RUN \
     git clone https://github.com/dune-gdt/dune-gdt.git /source && \
     cd /source && git checkout ${DUNE_GDT_REF} && \
@@ -42,18 +43,22 @@ RUN \
         tutorials \
         && \
     for OPTS in gcc-debug.ninja; do \
-        virtualenv -p python3.9 /venvs/venv-${OPTS} && \
-        echo "export DUNECONTROL=\"/source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} --only=dune-gdt \"" > /venvs/${OPTS}.sh && \
-        echo ". /venvs/venv-${OPTS}/bin/activate" >> /venvs/${OPTS}.sh && \
-        echo "cd /source" >> /venvs/${OPTS}.sh && \
-        . /venvs/${OPTS}.sh && \
+        export VENVDIR="/build/${OPTS}/venv" && \
+        virtualenv -p python3.9 "${VENVDIR}" && \
+        echo "export DUNECONTROL=\"/source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} --only=dune-gdt \"" > "${VENVDIR}.sh" && \
+        echo ". /venvs/venv-${OPTS}/bin/activate" >> "${VENVDIR}.sh" && \
+        echo "cd /source" >> "${VENVDIR}.sh" && \
+        . "${VENVDIR}.sh" && \
         python -m pip install mpi4py==4.0.3 -i https://pypi.anaconda.org/mpi4py/simple && \
         WERROR=0 /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} configure && \
-        /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all \
+        /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all && \
+        mkdir /venvs/${OPTS} && \
+        mv "${VENVDIR}" /venvs/${OPTS}/ && \
+        ; \
     ; done
     # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.xt-nspkg.pth && \
-    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth \
-    # rm -rf /build/${OPTS}/dune-gdt
+    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth && \
+# rm -rf /build/${OPTS}/dune-gdt
 
 RUN \
     mv /data/bashrc /root/.bashrc && \
