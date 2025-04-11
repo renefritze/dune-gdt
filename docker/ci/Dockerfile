@@ -53,12 +53,8 @@ RUN \
         WERROR=0 /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} configure && \
         /source/deps/dune-common/bin/dunecontrol --opts=./deps/config.opts/${OPTS} --builddir=/build/${OPTS} all && \
         mkdir /venvs/${OPTS} && \
-        mv "${VENVDIR}" /venvs/${OPTS}/ && \
-        ; \
+        mv "${VENVDIR}" "/venvs/${OPTS}/" \
     ; done
-    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.xt-nspkg.pth && \
-    # sed 's/;/\n/g' -i $(python -c "import site; print(site.getsitepackages()[0])")/dune.gdt-nspkg.pth && \
-# rm -rf /build/${OPTS}/dune-gdt
 
 RUN \
     mv /data/bashrc /root/.bashrc && \
