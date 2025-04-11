@@ -41,7 +41,20 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       OPTS: gcc-debug.ninja
+    outputs:
+      job_name: ${{steps.defs.outputs.job_name}}
+      workspace_artifact: ${{steps.defs.outputs.workspace_artifact}}
+      OPTS: ${{steps.defs.outputs.OPTS}}
     steps:
+
+    - name: Define job-wide variables
+      id: defs
+      run: |
+        { \
+          echo "job_name=build"; \
+          echo "workspace_artifact=workspace_after_build"; \
+          echo "OPTS=${OPTS}"; \
+        } >> "${GITHUB_OUTPUT}"
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -95,12 +108,10 @@ jobs:
         echo "::error::    DOCKER_RUN_CI_ARGS=-i OPTS=${OPTS} ./docker/run_ci.sh /bin/bash"
         exit 1
 
-    - uses: actions/cache/save@v4
-      name: Store build dir
+    - name: Dump workspace
+      uses: ./.github/actions/dump_workspace
       with:
-        path: build-dune-gdt-ci/gcc-debug.ninja
-        key: build
-        enableCrossOsArchive: true
+        artifact_name: ${{steps.defs.outputs.workspace_artifact}}
 
   cpp_test:
     name: C++ Tests
@@ -109,37 +120,25 @@ jobs:
     env:
       OPTS: gcc-debug.ninja
     steps:
-
+    # We only checkout for the load action, which will restore everything else
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        fetch-tags: true
-        submodules: recursive
+
+    - name: Load workspace
+      id: checkout
+      uses: ./.github/actions/load_workspace
+      with:
+        artifact_name: ${{needs.build.outputs.workspace_artifact}}
 
     # This step should not fail, as we checked this in prefligh
     - name: Pull docker/ci image
       run: docker pull ghcr.io/${{ github.repository }}/ci:$(./docker/compute_ci_hash.sh)
 
-    - uses: actions/cache/restore@v4
-      id: restore
-      name: Restore build dir
-      with:
-        path: build-dune-gdt-ci/gcc-debug.ninja
-        fail-on-cache-miss: true
-        key: build
-
-    - name: Report on cache hit
+    - name: re Build all should not take any time
       run: |
-        if [ "${{ steps.restore.outputs.cache-hit }}" == "true" ]; then
-          echo "Cache hit"
-        else
-          echo "Cache miss"
-        fi
-
-    - name: Build all
-      run: |
-        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} all'
+        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} bexec "ninja all"'
 
   #   - name: Check headers
   #     run: |
