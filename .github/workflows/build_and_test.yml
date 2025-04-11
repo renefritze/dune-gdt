@@ -74,7 +74,11 @@ jobs:
 
     - name: Build all 2nd time
       run: |
-        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} all'
+        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} bexec "ninja all"'
+
+    - name: Build all 3rd time
+      run: |
+        OPTS=${OPTS} ./docker/run_ci.sh '${DUNECONTROL} bexec "ninja all"'
 
     - name: Abort with meaningful error message (on failure)
       if: ${{ failure() }}
