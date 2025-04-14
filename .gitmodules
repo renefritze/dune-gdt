@@ -1,6 +1,6 @@
 [submodule "dune-common"]
 	path = deps/dune-common
-	url = https://github.com/dune-mirrors/dune-common.git
+	url = https://github.com/dune-community/dune-common.git
         ignore = dirty
 [submodule "dune-grid"]
 	path = deps/dune-grid
