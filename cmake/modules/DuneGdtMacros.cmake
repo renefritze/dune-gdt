@@ -12,13 +12,6 @@
 
 set(DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS TRUE)
 
-# enables "IN_LIST operator
-cmake_policy(SET CMP0057 NEW)
-
-# For some reason, the minimum required version is set to 2.8.3 by the find_package(Vc ...) call in
-# DuneCommonMacros.cmake in dune-common. This causes some warnings, so we reset it here.
-cmake_minimum_required(VERSION 3.8)
-
 include(XtCompilerSupport)
 include(XtTooling)
 include(DuneXTHints)
@@ -62,7 +55,7 @@ foreach(
   endif()
 endforeach()
 
-find_package(Eigen3 3.2.0)
+find_package(Eigen3 3.4.0)
 
 if(EIGEN3_FOUND)
   dune_register_package_flags(INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} COMPILE_DEFINITIONS "ENABLE_EIGEN=1")
@@ -140,10 +133,10 @@ if(NOT DS_HEADERCHECK_DISABLE)
 endif(NOT DS_HEADERCHECK_DISABLE)
 
 set(DXT_TEST_TIMEOUT
-    180
+    1000
     CACHE STRING "per-test timeout in seconds")
 set(DXT_TEST_PROCS
-    1
+    3
     CACHE STRING "run N tests in parallel")
 
 set(DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS TRUE)
@@ -151,13 +144,22 @@ set(DUNE_GRID_EXPERIMENTAL_GRID_EXTENSIONS TRUE)
 include(DunePybindxiUtils)
 
 # TODO there's no real way to require packages present at configure time? - jinja2,pyparsing is needed for test
-# templating
+# templating can't use the run-in-env script here, because it will try to use dune.common which we're trying to install
+# can't use dune-common_WHEELHOUSE here, because it is not set yet can't use a wildcard here, because no shell expansion
+# is done
 dune_execute_process(
   COMMAND
-  ${RUN_IN_ENV_SCRIPT}
-  python3
+  ${CMAKE_BINARY_DIR}/dune-env/bin/python
   -m
   pip
   install
   jinja2
   pyparsing)
+execute_process(
+  COMMAND ${CMAKE_BINARY_DIR}/dune-env/bin/python -m pip install
+          ${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/share/dune/wheelhouse/dune_common-2.10.0-py3-none-any.whl
+  COMMAND ${CMAKE_BINARY_DIR}/dune-env/bin/python -m pip install
+          ${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/share/dune/wheelhouse/dune_testtools-2.4-py3-none-any.whl
+  OUTPUT_VARIABLE pip_install_log ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+  ERROR_VARIABLE pip_install_log
+  OUTPUT_STRIP_TRAILING_WHITESPACE)

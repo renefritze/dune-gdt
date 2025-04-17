@@ -45,17 +45,14 @@ foreach(module IN LISTS DUNE_SUBMODULES)
   find_package(${module} CONFIG REQUIRED)
   list(APPEND CMAKE_MODULE_PATH ${${module}_MODULE_PATH})
 endforeach()
+find_library(TIRPC_LIB tirpc REQUIRED)
 
-# Dune::UGGrid
-set(GRID_LIBS Dune::ALUGrid)
+# tirpc is a requirement of alberta, which has no exports
+set(GRID_LIBS Dune::ALUGrid Dune::Grid Dune::ISTL Dune::Geometry Dune::AlbertaGrid3D)
 
 # find_program(RUN_IN_ENV_SCRIPT gdt-run-in-dune-env PATHS /usr/local/bin/ ${CMAKE_CURRENT_BINARY_DIR}
-# ${CMAKE_CURRENT_BINARY_DIR}/../dune-testtools/ REQUIRED)
-
-# execute_process(COMMAND ln -s ${RUN_IN_ENV_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/gdt-run-in-dune-env)
-set(DXT_TEST_TIMEOUT
-    1000
-    CACHE STRING "gtest timeout in seconds")
+# ${CMAKE_CURRENT_BINARY_DIR}/../dune-testtools/ REQUIRED) execute_process(COMMAND ln -s ${RUN_IN_ENV_SCRIPT}
+# ${CMAKE_CURRENT_BINARY_DIR}/gdt-run-in-dune-env)
 
 # include the dune macros
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
@@ -64,17 +61,6 @@ include(DuneUtils)
 
 # start a dune project with information from dune.module
 dune_project()
-
-# can't use the run-in-env script here, because it will try to use dune.common which we're trying to install can't use
-# dune-common_WHEELHOUSE here, because it is not set yet can't use a wildcard here, because no shell expansion is done
-execute_process(
-  COMMAND ${CMAKE_BINARY_DIR}/dune-env/bin/python -m pip install
-          ${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/share/dune/wheelhouse/dune_common-2.10.0-py3-none-any.whl
-  COMMAND ${CMAKE_BINARY_DIR}/dune-env/bin/python -m pip install
-          ${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/share/dune/wheelhouse/dune_testtools-2.4-py3-none-any.whl
-  OUTPUT_VARIABLE pip_install_log ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
-  ERROR_VARIABLE pip_install_log
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(DUNE_XT_WITH_PYTHON_BINDINGS)
   dune_enable_all_packages(INCLUDE_DIRS ${dune-gdt_SOURCE_DIR}/dune ${Python3_INCLUDE_DIRS} MODULE_LIBRARIES dunegdt)
@@ -124,8 +110,7 @@ make_dependent_modules_sys_included()
 add_subdirectory(python)
 make_dependent_modules_sys_included()
 
-# enable headercheck
-add_definitions("-DENABLE_HEADERCHECK=1")
+# TODO: this isn't actually the way to do it??? enable headercheck add_definitions("-DENABLE_HEADERCHECK=1")
 include(GridUtils)
 
 add_header_listing()
@@ -137,6 +122,8 @@ add_subdirectory(tutorials)
 
 add_tidy(${CMAKE_CURRENT_SOURCE_DIR})
 add_pylicense()
+
+dxt_exclude_from_headercheck(${CMAKE_SOURCE_DIR}/.vcpkg-root)
 
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
 # patch config.h to remove warnings about unused HAVE_GRIDTYPE
