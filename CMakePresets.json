@@ -48,6 +48,38 @@
       }
     },
     {
+      "name": "wheelbuilder-base",
+      "hidden": true,
+      "inherits": [
+        "ninja-base"
+      ],
+      "cacheVariables": {
+        "VCPKG_MANIFEST_FEATURES": ""
+      }
+    },
+    {
+      "name": "wheelbuilder-debug",
+      "displayName": "Wheelbuilder Debug Config",
+      "inherits": [
+        "wheelbuilder-base"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TIMEHISTORY_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "wheelbuilder-release",
+      "displayName": "Wheelbuilder Release Config",
+      "inherits": [
+        "wheelbuilder-base"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "TIMEHISTORY_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
       "name": "debug",
       "displayName": "Debug Config (Ninja)",
       "inherits": [
@@ -126,6 +158,14 @@
     }
   ],
   "buildPresets": [
+    {
+      "name": "wheelbuilder-debug",
+      "configurePreset": "wheelbuilder-debug"
+    },
+    {
+      "name": "wheelbuilder-release",
+      "configurePreset": "wheelbuilder-release"
+    },
     {
       "name": "debug",
       "configurePreset": "debug"
