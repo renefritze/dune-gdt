@@ -1,8 +1,8 @@
 {
   "name": "dune-common",
-  "version": "0.1.0",
+  "version": "2.10",
   "description": "Local overlay port for dune-common",
-  "homepage": "https://github.com/dune-community/dune-common",
+  "homepage": "https://github.com/dune-community/dune-common.git",
   "dependencies": [
     {
       "name": "vcpkg-cmake",

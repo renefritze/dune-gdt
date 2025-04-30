@@ -1,8 +1,8 @@
 {
   "name": "dune-grid-glue",
-  "version": "0.1.0",
+  "version": "2.10",
   "description": "Local overlay port for dune-grid-glue",
-  "homepage": "https://github.com/dune-community/dune-grid-glue",
+  "homepage": "https://github.com/dune-mirrors/dune-grid-glue.git",
   "dependencies": [
     {
       "name": "vcpkg-cmake",

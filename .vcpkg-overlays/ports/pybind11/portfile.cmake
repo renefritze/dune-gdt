@@ -2,7 +2,7 @@ set(VCPKG_BUILD_TYPE release)
 
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "${CMAKE_CURRENT_LIST_DIR}/../../../deps/pybind11"
+    URL "https://github.com/pybind/pybind11.git"
     REF a2e59f0e7065404b44dfe92a28aca47ba1378dc4
 )
 

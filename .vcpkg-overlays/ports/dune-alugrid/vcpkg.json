@@ -1,8 +1,8 @@
 {
   "name": "dune-alugrid",
-  "version": "0.1.0",
+  "version": "2.10",
   "description": "Local overlay port for dune-alugrid",
-  "homepage": "https://github.com/dune-community/dune-alugrid",
+  "homepage": "https://gitlab.dune-project.org/extensions/dune-alugrid.git",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
@@ -15,5 +15,15 @@
     {
       "name": "dune-grid"
     }
-  ]
+  ],
+  "features": {
+    "uggrid": {
+      "description": "Support for UG grid implementation",
+      "dependencies": [
+        {
+          "name": "dune-uggrid"
+        }
+      ]
+    }
+  }
 }

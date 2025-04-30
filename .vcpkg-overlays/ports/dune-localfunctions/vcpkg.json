@@ -1,8 +1,8 @@
 {
   "name": "dune-localfunctions",
-  "version": "0.1.0",
+  "version": "2.10",
   "description": "Local overlay port for dune-localfunctions",
-  "homepage": "https://github.com/dune-community/dune-localfunctions",
+  "homepage": "https://github.com/dune-mirrors/dune-localfunctions.git",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
