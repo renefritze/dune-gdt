@@ -8,15 +8,8 @@
       "description": "Enable UGGrid support",
       "dependencies": [
         {
-          "name": "dune-grid",
-          "features": [
-            "uggrid"
-          ]
-        },
-        {
           "name": "dune-uggrid"
         }
-
       ]
     },
     "alberta": {
