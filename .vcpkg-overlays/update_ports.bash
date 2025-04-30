@@ -20,16 +20,21 @@ fi
 # Pre-defined map of additional dependencies for specific ports
 declare -A PORT_DEPENDENCIES
 
-PORT_DEPENDENCIES[dune-alugrid]="dune-grid dune-uggrid"
-PORT_DEPENDENCIES[dune-grid]="dune-common dune-geometry dune-uggrid alberta"
+PORT_DEPENDENCIES[dune-alugrid]="dune-grid"
+PORT_DEPENDENCIES[dune-grid]="dune-common dune-geometry"
 PORT_DEPENDENCIES[dune-geometry]="dune-common"
 PORT_DEPENDENCIES[dune-grid-glue]="dune-grid"
 PORT_DEPENDENCIES[dune-istl]="dune-common"
 PORT_DEPENDENCIES[dune-localfunctions]="dune-geometry"
 PORT_DEPENDENCIES[dune-testtools]="dune-common"
-PORT_DEPENDENCIES[dune-uggrid]="dune-grid"
 
-# Add more as needed
+# Define features and their dependencies
+declare -A PORT_FEATURES
+PORT_FEATURES[dune-grid]="alberta:Support for Alberta grid implementation"
+
+# Define feature dependencies
+declare -A FEATURE_DEPENDENCIES
+FEATURE_DEPENDENCIES[dune-grid,alberta]="alberta"
 
 create_port_files() {
     local name=$1
@@ -67,6 +72,56 @@ create_port_files() {
         done
     fi
 
+    # Prepare features section if present
+    local features=""
+    if [[ -n "${PORT_FEATURES[$name]:-}" ]]; then
+        features=',
+    "features": {'
+
+        # Process each feature
+        IFS=';' read -ra feature_list <<< "${PORT_FEATURES[$name]}"
+        for feature_desc in "${feature_list[@]}"; do
+            # Split feature name and description
+            feature_name="${feature_desc%%:*}"
+            feature_description="${feature_desc#*:}"
+
+            features="$features
+        \"$feature_name\": {
+            \"description\": \"$feature_description\""
+
+            # Add feature dependencies if they exist
+            if [[ -n "${FEATURE_DEPENDENCIES[$name,$feature_name]:-}" ]]; then
+                features="$features,
+            \"dependencies\": ["
+
+                # Add each feature dependency
+                IFS=' ' read -ra feat_deps <<< "${FEATURE_DEPENDENCIES[$name,$feature_name]}"
+                first_dep=true
+                for feat_dep in "${feat_deps[@]}"; do
+                    if [ "$first_dep" = true ]; then
+                        first_dep=false
+                    else
+                        features="$features,"
+                    fi
+                    features="$features
+                {
+                    \"name\": \"$feat_dep\"
+                }"
+                done
+
+                features="$features
+            ]"
+            fi
+
+            features="$features
+        },"
+        done
+
+        # Remove trailing comma and close features object
+        features="${features%,}
+    }"
+    fi
+
     # Create vcpkg.json
     cat > "$port_dir/vcpkg.json" << EOF
 {
@@ -76,7 +131,7 @@ create_port_files() {
     "homepage": "https://github.com/dune-community/$name",
     "dependencies": [
 $dependencies
-    ]
+    ]$features
 }
 EOF
 

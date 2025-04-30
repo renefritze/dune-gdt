@@ -17,12 +17,16 @@
     },
     {
       "name": "dune-geometry"
-    },
-    {
-      "name": "alberta"
-    },
-    {
-      "name": "dune-uggrid"
     }
-  ]
+  ],
+  "features": {
+    "alberta": {
+      "description": "Support for Alberta grid implementation",
+      "dependencies": [
+        {
+          "name": "alberta"
+        }
+      ]
+    }
+  }
 }

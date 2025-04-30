@@ -16,7 +16,8 @@
         "VCPKG_OVERLAY_PORTS": {
           "type": "PATH",
           "value": "${sourceDir}/.vcpkg-overlays/ports"
-        }
+        },
+        "VCPKG_MANIFEST_FEATURES": "alberta;uggrid"
       }
     },
     {

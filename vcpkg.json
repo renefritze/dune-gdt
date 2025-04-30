@@ -3,8 +3,35 @@
   "version-string": "0.1.0",
   "description": "DUNE Generic Discretization Toolbox",
   "homepage": "https://github.com/dune-gdt/dune-gdt",
+  "features": {
+    "uggrid": {
+      "description": "Enable UGGrid support",
+      "dependencies": [
+        {
+          "name": "dune-grid",
+          "features": [
+            "uggrid"
+          ]
+        },
+        {
+          "name": "dune-uggrid"
+        }
+
+      ]
+    },
+    "alberta": {
+      "description": "Enable Alberta grid support",
+      "dependencies": [
+        {
+          "name": "dune-grid",
+          "features": [
+            "alberta"
+          ]
+        }
+      ]
+    }
+  },
   "dependencies": [
-    "alberta",
     "dune-common",
     "dune-geometry",
     "dune-grid",
