@@ -28,13 +28,14 @@ PORT_DEPENDENCIES[dune-testtools]="dune-common"
 
 # Define features and their dependencies
 declare -A PORT_FEATURES
-PORT_FEATURES[dune-grid]="alberta:Support for Alberta grid implementation"
+PORT_FEATURES[dune-grid]="alberta:Support for Alberta grid implementation;uggrid:Support for UG grid implementation"
 PORT_FEATURES[dune-alugrid]="uggrid:Support for UG grid implementation"
 
 # Define feature dependencies
 declare -A FEATURE_DEPENDENCIES
 FEATURE_DEPENDENCIES[dune-grid,alberta]="alberta"
-FEATURE_DEPENDENCIES[dune-alugrid,uggrid]="dune-uggrid"
+FEATURE_DEPENDENCIES[dune-grid,uggrid]="dune-uggrid"
+FEATURE_DEPENDENCIES[dune-alugrid,uggrid]="dune-uggrid dune-grid"
 
 # Iterate over all submodules from the associative array
 for submodule_name in "${!SUBMODULE_INFO_HASH[@]}"; do

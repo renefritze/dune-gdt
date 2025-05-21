@@ -45,6 +45,9 @@ foreach(module IN LISTS DUNE_SUBMODULES)
   find_package(${module} CONFIG REQUIRED)
   list(APPEND CMAKE_MODULE_PATH ${${module}_MODULE_PATH})
 endforeach()
+# optional
+find_package(dune-uggrid CONFIG)
+
 if(Alberta_FOUND)
   # alberta itself does not export its dependencies, so we need to find them manually
   find_library(TIRPC_LIB tirpc REQUIRED)

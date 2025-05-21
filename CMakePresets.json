@@ -54,7 +54,7 @@
         "ninja-base"
       ],
       "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": ""
+        "VCPKG_MANIFEST_FEATURES": "uggrid"
       }
     },
     {
