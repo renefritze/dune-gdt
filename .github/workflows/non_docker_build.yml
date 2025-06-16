@@ -40,6 +40,14 @@ jobs:
       id: configure_cmake
       run: cmake --preset=debug
 
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.2.0
+      with:
+        args: >
+          --define sonar.cfamily.compile-commands="build/debug/compile_commands.json"
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
     - name: Build
       run: cmake --build --preset=debug --parallel
 
