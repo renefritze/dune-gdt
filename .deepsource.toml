@@ -1,4 +1,11 @@
 version = 1
 
+test_patterns = [
+  "dune/gdt/test/**",
+  "dune/xt/test/**"
+]
+
+exclude_patterns = ["dune/xt/functions/expression/mathexpr.*"]
+
 [[analyzers]]
 name = "cxx"
