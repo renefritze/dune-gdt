@@ -121,3 +121,33 @@ jobs:
         packages-dir: wheels/
         repository-url: https://test.pypi.org/legacy/
         verbose: true
+
+  sonar:
+    name: Run Sonar Scanner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-tags: true
+        fetch-depth: 0
+
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build
+
+    - name: Configure CMake
+      id: configure_cmake
+      run: cmake --preset=debug
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.2.0
+      with:
+        args: >
+          --define sonar.cfamily.compile-commands="build/debug/compile_commands.json"
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
