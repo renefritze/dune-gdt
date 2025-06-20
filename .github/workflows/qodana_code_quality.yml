@@ -33,7 +33,7 @@ jobs:
       uses: JetBrains/qodana-action@v2024.3
       with:
         pr-mode: false
-        args: --compile-commands build/debug/compile_commands.json
+        args: --compile-commands,build/debug/compile_commands.json
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_526821687 }}
         QODANA_ENDPOINT: 'https://qodana.cloud'
